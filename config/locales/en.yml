@@ -45,6 +45,10 @@ en:
     quest_2:
       service_matches_reference: "quest 2 matches Quest2DataService reference output against the student service"
       step_mismatch: "Step %{step} must return a string that matches the Quest2DataService reference"
+    quest_3:
+      service_matches_reference: "quest 3 matches the routing reference output against the application response"
+      step_mismatch: "Step %{step} must return a string that matches the routing reference"
+      briefing_contains_hints: "quest 3 points to the files and routes the student must repair"
   quests:
     statuses:
       locked: "LOCKED"
@@ -73,6 +77,8 @@ en:
       restored: "✅ Module restored. Nice work, agent."
     quest_two:
       step_locked: "Finish the previous quest step first."
+    quest_three:
+      step_locked: "Finish the previous routing step first."
     meta:
       1:
         module_name: "db:broken"
@@ -82,6 +88,10 @@ en:
         module_name: "intel:seeded"
         title: "Seed the operational database"
         symptom: "Reference data is empty — analysts cannot see agents, missions, or skills"
+      3:
+        module_name: "routes:offline"
+        title: "Restore AccessGate routing"
+        symptom: "Buttons and forms are silent: routes are gone, redirects lead nowhere, and callbacks never fire"
     briefings:
       1:
         intro: "Agent, welcome to AgentArchive — the central archive of the operations division. After NULL's strike the system forgot which agents exist, what skills they have, and which missions they are assigned to."

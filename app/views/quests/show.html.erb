@@ -59,7 +59,11 @@
         quest_two_tasks: @quest_two_tasks,
         quest_two_current_task: @quest_two_current_task,
         quest_two_current_step: @quest_two_current_step,
-        quest_two_accessible_step: @quest_two_accessible_step
+        quest_two_accessible_step: @quest_two_accessible_step,
+        quest_three_tasks: @quest_three_tasks,
+        quest_three_current_task: @quest_three_current_task,
+        quest_three_current_step: @quest_three_current_step,
+        quest_three_accessible_step: @quest_three_accessible_step
       } %>
     </div>
 
@@ -76,10 +80,19 @@
       </p>
     </div>
 
-    <div class="rounded-xl border border-green-700/70 bg-green-900/20 p-4 mt-6">
-      <div class="text-xs uppercase tracking-[0.3em] text-green-400 mb-3">Твой прогресс:
-                <%= render partial: "shared/test_badge", locals: {results: @results} %>
-      </div>
+    <% step_progress = current_quest_step_progress(@quest.quest_number, @quest_two_tasks, @quest_three_tasks) %>
+    <div class="rounded-xl border border-green-700/70 bg-green-900/20 p-4 mt-6 space-y-3">
+      <div class="text-xs uppercase tracking-[0.3em] text-green-400">Твой прогресс</div>
+
+      <% if step_progress %>
+        <div class="text-xs flex gap-2 items-center">
+          <span class="<%= step_progress[:success] ? 'text-green-400' : 'text-cyan-300' %>">
+            ● <%= step_progress[:label] %>
+          </span>
+        </div>
+      <% end %>
+
+      <%= render partial: "shared/test_badge", locals: {results: @results} %>
     </div>
 
 

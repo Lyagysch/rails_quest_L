@@ -33,6 +33,8 @@ class QuestsController < ApplicationController
     case @quest.quest_number
     when 2
       prepare_quest_two_payload
+    when 3
+      prepare_quest_three_payload
     end
   end
 
@@ -57,6 +59,27 @@ class QuestsController < ApplicationController
     @quest_two_accessible_step = accessible_step
   end
 
+  def prepare_quest_three_payload
+    @quest_three_tasks = Quest3DataService.tasks.map do |task|
+      actual_output = Quest3DataService.output_for(task[:key])
+
+      task.merge(
+        actual_output: actual_output,
+        solved: normalized_output(actual_output) == normalized_output(task[:expected_output])
+      )
+    end
+
+    @quest_three_current_step = requested_quest_three_step
+    accessible_step = first_unsolved_quest_three_step
+
+    if @quest_three_current_step > accessible_step
+      redirect_to quest_path(@quest.quest_number, step: accessible_step), alert: t("quests.quest_three.step_locked") and return
+    end
+
+    @quest_three_current_task = @quest_three_tasks.find { |task| task[:step] == @quest_three_current_step }
+    @quest_three_accessible_step = accessible_step
+  end
+
   def requested_quest_two_step
     step = params[:step].presence&.to_i
     return first_unsolved_quest_two_step if step.blank? || step <= 0
@@ -66,6 +89,17 @@ class QuestsController < ApplicationController
 
   def first_unsolved_quest_two_step
     @quest_two_tasks.find { |task| !task[:solved] }&.fetch(:step) || @quest_two_tasks.size
+  end
+
+  def requested_quest_three_step
+    step = params[:step].presence&.to_i
+    return first_unsolved_quest_three_step if step.blank? || step <= 0
+
+    [ step, Quest3DataService.tasks.size ].min
+  end
+
+  def first_unsolved_quest_three_step
+    @quest_three_tasks.find { |task| !task[:solved] }&.fetch(:step) || @quest_three_tasks.size
   end
 
   def normalized_output(output)

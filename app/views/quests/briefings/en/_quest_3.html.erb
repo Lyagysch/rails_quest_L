@@ -1,0 +1,131 @@
+<% task = quest_three_current_task %>
+<% current_step = quest_three_current_step %>
+<% total_steps = quest_three_tasks.size %>
+
+<section class="space-y-6">
+  <div class="rounded-xl border border-cyan-900/70 bg-cyan-950/20 p-4">
+    <div class="text-xs uppercase tracking-[0.3em] text-cyan-500 mb-3">Reference points</div>
+    <p class="text-sm text-gray-300">
+      The main files for this quest are <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">config/routes.rb</code>
+      and <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">app/controllers/quest3_access_gate_controller.rb</code>.
+      To quickly verify the first step, you can use
+      <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">Quest3DataService.output_for(:ping_status)</code>
+      and the <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">/access_gate/ping</code> route.
+    </p>
+  </div>
+
+  <% if current_step == 1 %>
+    <p>
+      The <span class="text-cyan-300 font-semibold">AccessGate</span> module is responsible for routing incoming gateway requests.
+      Right now the client buttons and forms are already there, but the routes are not connected yet.
+    </p>
+
+    <p>
+      The database is not needed for this quest yet. Focus on <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">config/routes.rb</code>,
+      <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">app/controllers/quest3_access_gate_controller.rb</code>, and the request log behavior.
+    </p>
+
+    <div class="rounded-xl border border-cyan-900/70 bg-cyan-950/20 p-4">
+      <div class="text-xs uppercase tracking-[0.3em] text-cyan-500 mb-3">What you will need to do</div>
+      <ul class="list-disc space-y-2 pl-5 text-gray-200 marker:text-cyan-400">
+        <li>routes for different HTTP verbs: GET, POST, PATCH, DELETE;</li>
+        <li>controller methods and working with <code class="bg-gray-800 text-gray-300 px-1 py-0.5 rounded">params</code>;</li>
+        <li>conditional redirects;</li>
+        <li><code class="bg-gray-800 text-gray-300 px-1 py-0.5 rounded">before_action</code> and <code class="bg-gray-800 text-gray-300 px-1 py-0.5 rounded">after_action</code>.</li>
+      </ul>
+    </div>
+
+    <p>
+      Each step below includes a client-side button or form, but they do not work yet.
+      The app may return 403 or 404 until the correct route is created and the required controller method is implemented.
+    </p>
+  <% end %>
+
+  <div class="rounded-xl border border-cyan-900/70 bg-cyan-950/20 p-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div class="text-xs uppercase tracking-[0.3em] text-cyan-500 mb-2">Step <%= current_step %> of <%= total_steps %></div>
+        <div class="text-lg font-semibold text-white"><%= task[:title][:en] %></div>
+      </div>
+      <div class="rounded-full px-3 py-1 text-xs font-semibold <%= task[:solved] ? 'bg-green-500/20 text-green-300 border border-green-500/40' : 'bg-gray-800 text-gray-300 border border-gray-700' %>">
+        <%= task[:solved] ? 'MATCHED' : 'WAITING' %>
+      </div>
+    </div>
+    <p class="mt-3 text-sm text-gray-300"><%= task[:description][:en] %></p>
+  </div>
+
+  <div class="rounded-xl border border-purple-700/60 bg-purple-950/20 p-4">
+    <div class="text-xs uppercase tracking-[0.3em] text-purple-400 mb-3">Client sandbox</div>
+    <div class="text-sm text-gray-300 mb-4">Click the button or submit the form for the current step.</div>
+
+    <% case task[:key] %>
+    <% when :ping_status %>
+      <%= button_to 'GET /access_gate/ping', '/access_gate/ping', method: :get, form_class: 'inline-block', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition', data: { turbo: false } %>
+    <% when :scan_status %>
+      <%= form_with url: '/access_gate/scan', method: :post, local: true, data: { turbo: false }, class: 'grid gap-3 md:grid-cols-2' do |form| %>
+        <%= form.text_field :agent, value: 'Echo', class: 'rounded bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white' %>
+        <%= form.text_field :sector, value: '7', class: 'rounded bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white' %>
+        <%= form.submit 'POST /access_gate/scan', class: 'md:col-span-2 px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition cursor-pointer' %>
+      <% end %>
+    <% when :power_status %>
+      <%= form_with url: '/access_gate/power', method: :patch, local: true, data: { turbo: false }, class: 'grid gap-3 md:grid-cols-2' do |form| %>
+        <%= form.text_field :current, value: '18', class: 'rounded bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white' %>
+        <%= form.text_field :boost, value: '6', class: 'rounded bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white' %>
+        <%= form.submit 'PATCH /access_gate/power', class: 'md:col-span-2 px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition cursor-pointer' %>
+      <% end %>
+    <% when :stale_logs_status %>
+      <%= button_to 'DELETE /access_gate/logs/stale?count=3', '/access_gate/logs/stale?count=3', method: :delete, form_class: 'inline-block', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition', data: { turbo: false } %>
+    <% when :clearance_status %>
+      <%= button_to 'GET /access_gate/clearance?level=4&boost=2', '/access_gate/clearance?level=4&boost=2', method: :get, form_class: 'inline-block', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition', data: { turbo: false } %>
+    <% when :verify_success_status %>
+      <%= form_with url: '/access_gate/verify', method: :post, local: true, data: { turbo: false }, class: 'space-y-3' do |form| %>
+        <%= form.hidden_field :token, value: 'alpha-7' %>
+        <%= form.submit 'POST /access_gate/verify (alpha-7)', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition cursor-pointer' %>
+      <% end %>
+    <% when :granted_status %>
+      <%= button_to 'GET /access_gate/granted?token=alpha-7', '/access_gate/granted?token=alpha-7', method: :get, form_class: 'inline-block', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition', data: { turbo: false } %>
+    <% when :verify_failure_status %>
+      <%= form_with url: '/access_gate/verify', method: :post, local: true, data: { turbo: false }, class: 'space-y-3' do |form| %>
+        <%= form.hidden_field :token, value: 'omega-9' %>
+        <%= form.submit 'POST /access_gate/verify (omega-9)', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition cursor-pointer' %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="rounded-xl border border-amber-700/60 bg-amber-950/20 p-4">
+    <div class="text-xs uppercase tracking-[0.3em] text-amber-400 mb-3">Terminal command</div>
+    <pre class="overflow-x-auto whitespace-pre-wrap text-sm text-amber-100"><%= task[:command] %></pre>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="rounded-xl border border-green-700/60 bg-green-950/20 p-4">
+      <div class="text-xs uppercase tracking-[0.3em] text-green-400 mb-3">Expected output</div>
+      <pre class="min-h-48 whitespace-pre-wrap text-sm leading-relaxed text-green-100"><%= task[:expected_output] %></pre>
+    </div>
+
+    <div class="rounded-xl border border-cyan-700/60 bg-cyan-950/20 p-4">
+      <div class="text-xs uppercase tracking-[0.3em] text-cyan-400 mb-3">Probe service output</div>
+      <pre class="min-h-48 whitespace-pre-wrap text-sm leading-relaxed text-cyan-100"><%= truncated_probe_output(task[:actual_output]) %></pre>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-800 pt-4">
+    <div class="flex gap-3">
+      <% if current_step > 1 %>
+        <%= link_to '← Previous step', quest_three_step_path(current_step - 1), class: 'px-4 py-2 rounded bg-gray-800 hover:bg-gray-700 text-sm text-white transition' %>
+      <% end %>
+    </div>
+
+    <% if current_step < total_steps %>
+      <% if task[:solved] %>
+        <%= link_to 'Next →', quest_three_step_path(current_step + 1), class: 'px-4 py-2 rounded bg-cyan-700 hover:bg-cyan-600 text-sm font-semibold text-white transition' %>
+      <% else %>
+        <span class="px-4 py-2 rounded bg-gray-800 text-sm font-semibold text-gray-500 cursor-not-allowed border border-gray-700">Next →</span>
+      <% end %>
+    <% else %>
+      <span class="px-4 py-2 rounded bg-green-500/20 text-sm font-semibold text-green-300 border border-green-500/40">
+        Once everything matches, you can run <code class="bg-gray-800 text-gray-300 px-1 py-0.5 rounded">rails quest:accept[3]</code>.
+      </span>
+    <% end %>
+  </div>
+</section>

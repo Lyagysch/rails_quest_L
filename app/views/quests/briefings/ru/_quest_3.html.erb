@@ -1,0 +1,131 @@
+<% task = quest_three_current_task %>
+<% current_step = quest_three_current_step %>
+<% total_steps = quest_three_tasks.size %>
+
+<section class="space-y-6">
+  <div class="rounded-xl border border-cyan-900/70 bg-cyan-950/20 p-4">
+    <div class="text-xs uppercase tracking-[0.3em] text-cyan-500 mb-3">Опорные точки</div>
+    <p class="text-sm text-gray-300">
+      Основные файлы квеста: <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">config/routes.rb</code>
+      и <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">app/controllers/quest3_access_gate_controller.rb</code>.
+      Для быстрой проверки первого шага можно использовать
+      <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">Quest3DataService.output_for(:ping_status)</code>
+      и маршрут <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">/access_gate/ping</code>.
+    </p>
+  </div>
+
+  <% if current_step == 1 %>
+    <p>
+      Модуль <span class="text-cyan-300 font-semibold">AccessGate</span> отвечает за маршрутизацию запросов внутри шлюза доступа.
+      Сейчас кнопки и формы на клиенте есть, но маршруты не подключены.
+    </p>
+
+    <p>
+      В этом квесте база данных пока нужна. Всё внимание — на <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">config/routes.rb</code>,
+      <code class="bg-gray-800 text-gray-300 px-2 py-1 rounded">app/controllers/quest3_access_gate_controller.rb</code> и на поведение логи запросов.
+    </p>
+
+    <div class="rounded-xl border border-cyan-900/70 bg-cyan-950/20 p-4">
+      <div class="text-xs uppercase tracking-[0.3em] text-cyan-500 mb-3">Что понадобится сделать:</div>
+      <ul class="list-disc space-y-2 pl-5 text-gray-200 marker:text-cyan-400">
+        <li>маршруты для разных HTTP-глаголов: GET, POST, PATCH, DELETE;</li>
+        <li>методы контроллера и работу с <code class="bg-gray-800 text-gray-300 px-1 py-0.5 rounded">params</code>;</li>
+        <li>условные редиректы;</li>
+        <li><code class="bg-gray-800 text-gray-300 px-1 py-0.5 rounded">before_action</code> и <code class="bg-gray-800 text-gray-300 px-1 py-0.5 rounded">after_action</code>.</li>
+      </ul>
+    </div>
+
+    <p>
+      Для каждого шага ниже есть клиентская кнопка или форма. Но они не работают.
+      Приложение будет возвращать 403 или 404, пока пока не будет создан правильный маршрут и не будет реализован нужный метод контроллера.
+    </p>
+  <% end %>
+
+  <div class="rounded-xl border border-cyan-900/70 bg-cyan-950/20 p-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div class="text-xs uppercase tracking-[0.3em] text-cyan-500 mb-2">Шаг <%= current_step %> из <%= total_steps %></div>
+        <div class="text-lg font-semibold text-white"><%= task[:title][:ru] %></div>
+      </div>
+      <div class="rounded-full px-3 py-1 text-xs font-semibold <%= task[:solved] ? 'bg-green-500/20 text-green-300 border border-green-500/40' : 'bg-gray-800 text-gray-300 border border-gray-700' %>">
+        <%= task[:solved] ? 'СОВПАЛО' : 'ОЖИДАЕТСЯ' %>
+      </div>
+    </div>
+    <p class="mt-3 text-sm text-gray-300"><%= task[:description][:ru] %></p>
+  </div>
+
+  <div class="rounded-xl border border-purple-700/60 bg-purple-950/20 p-4">
+    <div class="text-xs uppercase tracking-[0.3em] text-purple-400 mb-3">Клиентский стенд</div>
+    <div class="text-sm text-gray-300 mb-4">Нажми кнопку или отправь форму для текущего шага. </div>
+
+    <% case task[:key] %>
+    <% when :ping_status %>
+      <%= button_to 'GET /access_gate/ping', '/access_gate/ping', method: :get, form_class: 'inline-block', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition', data: { turbo: false } %>
+    <% when :scan_status %>
+      <%= form_with url: '/access_gate/scan', method: :post, local: true, data: { turbo: false }, class: 'grid gap-3 md:grid-cols-2' do |form| %>
+        <%= form.text_field :agent, value: 'Echo', class: 'rounded bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white' %>
+        <%= form.text_field :sector, value: '7', class: 'rounded bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white' %>
+        <%= form.submit 'POST /access_gate/scan', class: 'md:col-span-2 px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition cursor-pointer' %>
+      <% end %>
+    <% when :power_status %>
+      <%= form_with url: '/access_gate/power', method: :patch, local: true, data: { turbo: false }, class: 'grid gap-3 md:grid-cols-2' do |form| %>
+        <%= form.text_field :current, value: '18', class: 'rounded bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white' %>
+        <%= form.text_field :boost, value: '6', class: 'rounded bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white' %>
+        <%= form.submit 'PATCH /access_gate/power', class: 'md:col-span-2 px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition cursor-pointer' %>
+      <% end %>
+    <% when :stale_logs_status %>
+      <%= button_to 'DELETE /access_gate/logs/stale?count=3', '/access_gate/logs/stale?count=3', method: :delete, form_class: 'inline-block', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition', data: { turbo: false } %>
+    <% when :clearance_status %>
+      <%= button_to 'GET /access_gate/clearance?level=4&boost=2', '/access_gate/clearance?level=4&boost=2', method: :get, form_class: 'inline-block', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition', data: { turbo: false } %>
+    <% when :verify_success_status %>
+      <%= form_with url: '/access_gate/verify', method: :post, local: true, data: { turbo: false }, class: 'space-y-3' do |form| %>
+        <%= form.hidden_field :token, value: 'alpha-7' %>
+        <%= form.submit 'POST /access_gate/verify (alpha-7)', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition cursor-pointer' %>
+      <% end %>
+    <% when :granted_status %>
+      <%= button_to 'GET /access_gate/granted?token=alpha-7', '/access_gate/granted?token=alpha-7', method: :get, form_class: 'inline-block', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition', data: { turbo: false } %>
+    <% when :verify_failure_status %>
+      <%= form_with url: '/access_gate/verify', method: :post, local: true, data: { turbo: false }, class: 'space-y-3' do |form| %>
+        <%= form.hidden_field :token, value: 'omega-9' %>
+        <%= form.submit 'POST /access_gate/verify (omega-9)', class: 'px-4 py-2 rounded bg-purple-700 hover:bg-purple-600 text-sm font-semibold text-white transition cursor-pointer' %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="rounded-xl border border-amber-700/60 bg-amber-950/20 p-4">
+    <div class="text-xs uppercase tracking-[0.3em] text-amber-400 mb-3">Команда для терминала</div>
+    <pre class="overflow-x-auto whitespace-pre-wrap text-sm text-amber-100"><%= task[:command] %></pre>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="rounded-xl border border-green-700/60 bg-green-950/20 p-4">
+      <div class="text-xs uppercase tracking-[0.3em] text-green-400 mb-3">Правильный ответ</div>
+      <pre class="min-h-48 whitespace-pre-wrap text-sm leading-relaxed text-green-100"><%= task[:expected_output] %></pre>
+    </div>
+
+    <div class="rounded-xl border border-cyan-700/60 bg-cyan-950/20 p-4">
+      <div class="text-xs uppercase tracking-[0.3em] text-cyan-400 mb-3">Что вернул probe-сервис</div>
+      <pre class="min-h-48 whitespace-pre-wrap text-sm leading-relaxed text-cyan-100"><%= truncated_probe_output(task[:actual_output]) %></pre>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-800 pt-4">
+    <div class="flex gap-3">
+      <% if current_step > 1 %>
+        <%= link_to '← Предыдущий шаг', quest_three_step_path(current_step - 1), class: 'px-4 py-2 rounded bg-gray-800 hover:bg-gray-700 text-sm text-white transition' %>
+      <% end %>
+    </div>
+
+    <% if current_step < total_steps %>
+      <% if task[:solved] %>
+        <%= link_to 'Далее →', quest_three_step_path(current_step + 1), class: 'px-4 py-2 rounded bg-cyan-700 hover:bg-cyan-600 text-sm font-semibold text-white transition' %>
+      <% else %>
+        <span class="px-4 py-2 rounded bg-gray-800 text-sm font-semibold text-gray-500 cursor-not-allowed border border-gray-700">Далее →</span>
+      <% end %>
+    <% else %>
+      <span class="px-4 py-2 rounded bg-green-500/20 text-sm font-semibold text-green-300 border border-green-500/40">
+        Когда всё совпадёт, можно выполнить <code class="bg-gray-800 text-gray-300 px-1 py-0.5 rounded">rails quest:accept[3]</code>.
+      </span>
+    <% end %>
+  </div>
+</section>

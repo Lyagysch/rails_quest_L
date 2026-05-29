@@ -70,6 +70,7 @@ namespace :quest do
     puts "─" * 60
     puts "  Run \e[36mrails quest:check[N]\e[0m to execute tests for quest N"
     puts "  Run \e[36mrails quest:accept[N]\e[0m to mark quest as accepted (CLI)\n\n"
+    puts "  Run \e[36mrails quest:unlock[N]\e[0m to temporarily unlock any quest for development\n\n"
   end
 
   desc "Accept quest N (CLI shortcut). Usage: rails quest:accept[1]"
@@ -108,5 +109,18 @@ namespace :quest do
 
     quest.update!(status: "unlocked", accepted_at: nil)
     puts "\e[36m↩ Quest #{number} reset to unlocked.\e[0m"
+  end
+
+  desc "Temporarily unlock quest N without progressing previous quests. Usage: rails quest:unlock[3]"
+  task :unlock, [ :number ] => :environment do |_, args|
+    number = args[:number].to_i
+    abort "Usage: rails quest:unlock[1..5]" unless (1..5).include?(number)
+
+    quest = QuestProgress.find_by(quest_number: number)
+    abort "Quest #{number} not found." unless quest
+
+    quest.update!(status: "unlocked", unlocked_at: Time.current, accepted_at: nil)
+
+    puts "\e[36m🔓 Quest #{number} unlocked for development.\e[0m"
   end
 end
